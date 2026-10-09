@@ -1,6 +1,6 @@
 import { watch, type Ref } from 'vue'
 import { playSfx } from '@/modules/audio/utils/audioEngine'
-import type { GameState, HandSide, PlayerIndex } from '@/modules/game/models/game.models'
+import type { HandSide, PlayerIndex, RoundResult } from '@/modules/game/models/game.models'
 import {
   MOVE_CONTACT_MS,
   URGENT_SECONDS,
@@ -10,7 +10,7 @@ import {
 import { addFingers, getOpponent } from '@/modules/game/utils/gameRules'
 
 interface GameSoundSources {
-  state: Ref<GameState>
+  roundResult: Ref<RoundResult | null>
   selectedHand: Ref<HandSide | null>
   activeMove: Ref<ActiveMove | null>
   lastEvent: Ref<GameEvent | null>
@@ -49,11 +49,9 @@ export function useGameSounds(sources: GameSoundSources) {
     }
   })
 
-  watch(
-    () => sources.state.value.winner,
-    (winner) => {
-      if (winner === null) return
-      playSfx(winner === sources.cpuPlayer ? 'lose' : 'win', { delay: 0.35 })
-    },
-  )
+  watch(sources.roundResult, (result, previous) => {
+    if (!result || previous) return
+    if (result.kind === 'draw') playSfx('draw', { delay: 0.35 })
+    else playSfx(result.winner === sources.cpuPlayer ? 'lose' : 'win', { delay: 0.35 })
+  })
 }

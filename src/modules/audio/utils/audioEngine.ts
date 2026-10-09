@@ -1,5 +1,15 @@
 export type SoundEffect =
-  'click' | 'select' | 'hit' | 'knockout' | 'split' | 'tick' | 'timeout' | 'win' | 'lose' | 'start'
+  | 'click'
+  | 'select'
+  | 'hit'
+  | 'knockout'
+  | 'split'
+  | 'tick'
+  | 'timeout'
+  | 'win'
+  | 'lose'
+  | 'draw'
+  | 'start'
 
 interface ToneOptions {
   type?: OscillatorType
@@ -189,6 +199,18 @@ export function playSfx(effect: SoundEffect, options: { delay?: number; level?: 
           start: start + index * 0.11,
           duration: index === 5 ? 0.5 : 0.12,
           volume: 0.5,
+          destination,
+        }),
+      )
+      break
+    case 'draw':
+      ;[64, 67, 64].forEach((note, index) =>
+        tone({
+          type: 'triangle',
+          frequency: midiToFrequency(note),
+          start: start + index * 0.16,
+          duration: index === 2 ? 0.4 : 0.14,
+          volume: 0.4,
           destination,
         }),
       )

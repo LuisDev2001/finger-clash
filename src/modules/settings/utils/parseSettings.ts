@@ -2,8 +2,10 @@ import {
   CPU_LEVELS,
   DEFAULT_SETTINGS,
   GAME_MODES,
+  TARGET_WINS_OPTIONS,
   TURN_SECONDS_OPTIONS,
   type Settings,
+  type TargetWins,
   type TurnSeconds,
 } from '@/modules/settings/models/settings.models'
 
@@ -18,6 +20,11 @@ export function parseSettings(raw: unknown): Settings {
       value.turnSeconds,
       TURN_SECONDS_OPTIONS,
       DEFAULT_SETTINGS.turnSeconds,
+    ),
+    targetWins: pickOption<TargetWins>(
+      value.targetWins,
+      TARGET_WINS_OPTIONS,
+      DEFAULT_SETTINGS.targetWins,
     ),
     musicVolume: pickVolume(value.musicVolume, DEFAULT_SETTINGS.musicVolume),
     sfxVolume: pickVolume(value.sfxVolume, DEFAULT_SETTINGS.sfxVolume),

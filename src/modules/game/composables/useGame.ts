@@ -1,12 +1,20 @@
 import { computed, onScopeDispose, ref } from 'vue'
 import type { CpuLevel, GameMode } from '@/modules/settings/models/settings.models'
-import type { GameState, HandSide, Move, PlayerIndex } from '@/modules/game/models/game.models'
+import type {
+  GameState,
+  HandSide,
+  Move,
+  PlayerIndex,
+  RoundResult,
+} from '@/modules/game/models/game.models'
 import {
   applyMove,
   createInitialState,
   getLegalMoves,
   getOpponent,
+  getPositionKey,
   passTurn,
+  REPETITION_LIMIT,
 } from '@/modules/game/utils/gameRules'
 import { chooseCpuMove } from '@/modules/game/utils/cpuPlayer'
 
@@ -36,6 +44,9 @@ const TIMER_TICK_MS = 100
 
 export function useGame(options: GameOptions) {
   const state = ref<GameState>(createInitialState())
+  const isDraw = ref(false)
+  const repetitionCount = ref(0)
+  const positionCounts = new Map<string, number>()
   const selectedHand = ref<HandSide | null>(null)
   const activeMove = ref<ActiveMove | null>(null)
   const lastEvent = ref<GameEvent | null>(null)
@@ -45,11 +56,16 @@ export function useGame(options: GameOptions) {
   let turnTicker: ReturnType<typeof setInterval> | undefined
   let eventCount = 0
 
+  const roundResult = computed<RoundResult | null>(() => {
+    if (state.value.winner !== null) return { kind: 'win', winner: state.value.winner }
+    return isDraw.value ? { kind: 'draw' } : null
+  })
+  const isRoundOver = computed(() => roundResult.value !== null)
   const isCpuTurn = computed(
-    () => options.mode === 'cpu' && state.value.turn === CPU && state.value.winner === null,
+    () => options.mode === 'cpu' && state.value.turn === CPU && !isRoundOver.value,
   )
   const isInputLocked = computed(
-    () => activeMove.value !== null || isCpuTurn.value || state.value.winner !== null,
+    () => activeMove.value !== null || isCpuTurn.value || isRoundOver.value,
   )
   const canSplitNow = computed(
     () => !isInputLocked.value && getLegalMoves(state.value).some((move) => move.type === 'split'),
@@ -75,9 +91,18 @@ export function useGame(options: GameOptions) {
     stopTurnTimer()
   }
 
+  function setState(next: GameState) {
+    state.value = next
+    const key = getPositionKey(next)
+    const count = (positionCounts.get(key) ?? 0) + 1
+    positionCounts.set(key, count)
+    repetitionCount.value = count
+    if (next.winner === null && count >= REPETITION_LIMIT) isDraw.value = true
+  }
+
   function startTurnTimer() {
     stopTurnTimer()
-    if (options.turnSeconds <= 0 || state.value.winner !== null || isCpuTurn.value) return
+    if (options.turnSeconds <= 0 || isRoundOver.value || isCpuTurn.value) return
 
     now.value = Date.now()
     turnDeadline.value = now.value + options.turnSeconds * 1000
@@ -97,11 +122,12 @@ export function useGame(options: GameOptions) {
     stopTurnTimer()
     lastEvent.value = { kind: 'timeout', id: ++eventCount, player: state.value.turn }
     selectedHand.value = null
-    state.value = passTurn(state.value)
+    setState(passTurn(state.value))
     beginTurn()
   }
 
   function beginTurn() {
+    if (isRoundOver.value) return
     if (isCpuTurn.value) {
       later(CPU_THINK_MS, () => play(chooseCpuMove(state.value, options.cpuLevel)))
       return
@@ -118,7 +144,7 @@ export function useGame(options: GameOptions) {
     selectedHand.value = null
 
     later(MOVE_CONTACT_MS, () => {
-      state.value = applyMove(before, move)
+      setState(applyMove(before, move))
     })
     later(MOVE_DURATION_MS, () => {
       activeMove.value = null
@@ -146,15 +172,18 @@ export function useGame(options: GameOptions) {
     if (canSplitNow.value) play({ type: 'split' })
   }
 
-  function restart() {
+  function restart(firstTurn: PlayerIndex = 0) {
     clearTimers()
-    state.value = createInitialState()
+    positionCounts.clear()
+    isDraw.value = false
+    setState(createInitialState(firstTurn))
     selectedHand.value = null
     activeMove.value = null
     lastEvent.value = null
     beginTurn()
   }
 
+  setState(state.value)
   beginTurn()
   onScopeDispose(clearTimers)
 
@@ -163,6 +192,8 @@ export function useGame(options: GameOptions) {
     selectedHand,
     activeMove,
     lastEvent,
+    roundResult,
+    repetitionCount,
     remainingMs,
     remainingSeconds,
     isCpuTurn,

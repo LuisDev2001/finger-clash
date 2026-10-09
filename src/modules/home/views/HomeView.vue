@@ -7,6 +7,7 @@ import TermsDialog from '@/modules/home/components/TermsDialog.vue'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import {
   CPU_LEVEL_LABELS,
+  formatTargetWins,
   formatTurnSeconds,
   MODE_LABELS,
 } from '@/modules/settings/models/settings.models'
@@ -22,6 +23,7 @@ const settingsSummary = computed(() =>
     MODE_LABELS[settings.value.mode],
     settings.value.mode === 'cpu' ? `CPU ${CPU_LEVEL_LABELS[settings.value.cpuLevel]}` : null,
     `⏱ ${formatTurnSeconds(settings.value.turnSeconds)}`,
+    formatTargetWins(settings.value.targetWins),
   ]
     .filter(Boolean)
     .join(' · '),

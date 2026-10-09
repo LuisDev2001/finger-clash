@@ -4,6 +4,7 @@ import {
   applyMove,
   createInitialState,
   getLegalMoves,
+  getPositionKey,
   passTurn,
 } from '@/modules/game/utils/gameRules'
 
@@ -104,5 +105,15 @@ describe('passTurn', () => {
 
     expect(next.turn).toBe(1)
     expect(next.players).toEqual(state.players)
+  })
+})
+
+describe('getPositionKey', () => {
+  it('distinguishes hands and whose turn it is', () => {
+    const state = stateWith([2, 3], [1, 4])
+
+    expect(getPositionKey(state)).toBe('0:23-14')
+    expect(getPositionKey(passTurn(state))).toBe('1:23-14')
+    expect(getPositionKey(createInitialState(1))).toBe('1:11-11')
   })
 })

@@ -8,14 +8,15 @@ import type {
 
 export const FINGERS_PER_HAND = 5
 export const HAND_SIDES: readonly HandSide[] = ['left', 'right']
+export const REPETITION_LIMIT = 3
 
-export function createInitialState(): GameState {
+export function createInitialState(firstTurn: PlayerIndex = 0): GameState {
   return {
     players: [
       { left: 1, right: 1 },
       { left: 1, right: 1 },
     ],
-    turn: 0,
+    turn: firstTurn,
     winner: null,
   }
 }
@@ -84,6 +85,11 @@ export function applyMove(state: GameState, move: Move): GameState {
     turn: opponent,
     winner: isOutOfFingers(rival) ? turn : null,
   }
+}
+
+export function getPositionKey({ players, turn }: GameState): string {
+  const [first, second] = players
+  return `${turn}:${first.left}${first.right}-${second.left}${second.right}`
 }
 
 export function passTurn(state: GameState): GameState {

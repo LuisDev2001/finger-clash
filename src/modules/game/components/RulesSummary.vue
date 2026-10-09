@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{ turnSeconds: number }>()
+defineProps<{ turnSeconds: number; targetWins: number }>()
 </script>
 
 <template>
@@ -15,7 +15,11 @@ defineProps<{ turnSeconds: number }>()
       <li v-if="turnSeconds > 0">
         Tienes {{ turnSeconds }} segundos por turno; si se acaban, pierdes el turno.
       </li>
-      <li>Pierde quien se queda sin dedos en ambas manos.</li>
+      <li>Pierde la ronda quien se queda sin dedos en ambas manos.</li>
+      <li>Si la misma posición se repite 3 veces, la ronda termina en empate.</li>
+      <li v-if="targetWins > 1">
+        Gana la partida quien llegue primero a {{ targetWins }} victorias.
+      </li>
     </ul>
   </details>
 </template>

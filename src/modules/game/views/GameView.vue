@@ -4,15 +4,23 @@ import { useRouter } from 'vue-router'
 import { playSfx } from '@/modules/audio/utils/audioEngine'
 import PlayerHand from '@/modules/game/components/PlayerHand.vue'
 import RulesSummary from '@/modules/game/components/RulesSummary.vue'
+import RoundOverlay from '@/modules/game/components/RoundOverlay.vue'
+import ScoreDots from '@/modules/game/components/ScoreDots.vue'
 import TurnTimer from '@/modules/game/components/TurnTimer.vue'
-import WinnerOverlay from '@/modules/game/components/WinnerOverlay.vue'
 import { CPU, HUMAN, useGame, type GameEvent } from '@/modules/game/composables/useGame'
 import { useGameSounds } from '@/modules/game/composables/useGameSounds'
+import { useMatch } from '@/modules/game/composables/useMatch'
 import { useMoveAnimation } from '@/modules/game/composables/useMoveAnimation'
 import type { HandSide, PlayerIndex } from '@/modules/game/models/game.models'
-import { addFingers, getOpponent, HAND_SIDES } from '@/modules/game/utils/gameRules'
+import {
+  addFingers,
+  getOpponent,
+  HAND_SIDES,
+  REPETITION_LIMIT,
+} from '@/modules/game/utils/gameRules'
 import {
   CPU_LEVEL_LABELS,
+  formatTargetWins,
   formatTurnSeconds,
   MODE_LABELS,
 } from '@/modules/settings/models/settings.models'
@@ -22,7 +30,7 @@ import BaseButton from '@/shared/components/BaseButton.vue'
 
 const router = useRouter()
 const { settings, toggleMute } = useSettings()
-const { mode, cpuLevel, turnSeconds } = settings.value
+const { mode, cpuLevel, turnSeconds, targetWins } = settings.value
 const options = { mode, cpuLevel, turnSeconds }
 
 const {
@@ -30,6 +38,8 @@ const {
   selectedHand,
   activeMove,
   lastEvent,
+  roundResult,
+  repetitionCount,
   remainingMs,
   remainingSeconds,
   isCpuTurn,
@@ -39,13 +49,19 @@ const {
   split,
   restart,
 } = useGame(options)
+const { score, roundNumber, isMatchOver, nextRound, restartMatch } = useMatch({
+  targetWins,
+  roundResult,
+  startRound: restart,
+})
 
 const boardRef = ref<HTMLElement | null>(null)
 const isCpuMode = mode === 'cpu'
+const isMultiRound = targetWins > 1
 
 useMoveAnimation(boardRef, activeMove)
 useGameSounds({
-  state,
+  roundResult,
   selectedHand,
   activeMove,
   lastEvent,
@@ -68,6 +84,7 @@ const matchLabel = [
   MODE_LABELS[mode],
   isCpuMode ? CPU_LEVEL_LABELS[cpuLevel] : null,
   formatTurnSeconds(turnSeconds),
+  formatTargetWins(targetWins),
 ]
   .filter(Boolean)
   .join(' · ')
@@ -78,8 +95,8 @@ const splitTotal = computed(() => {
 })
 
 const statusText = computed(() => {
-  const { turn, winner } = state.value
-  if (winner !== null) return ''
+  const { turn } = state.value
+  if (roundResult.value) return ''
   if (isCpuTurn.value) return 'La CPU está pensando…'
   const prefix = isCpuMode ? 'Tu turno' : `Turno de ${playerNames[turn]}`
   if (selectedHand.value) return `${prefix}: toca una mano rival`
@@ -87,15 +104,50 @@ const statusText = computed(() => {
 })
 
 const eventSummary = computed(() => (lastEvent.value ? describeEvent(lastEvent.value) : ''))
-const isHumanDefeated = computed(() => isCpuMode && state.value.winner === CPU)
-const showWinner = computed(() => state.value.winner !== null && !activeMove.value)
+const isRepetitionWarning = computed(
+  () => !roundResult.value && repetitionCount.value === REPETITION_LIMIT - 1,
+)
 
-const winnerTitle = computed(() => {
-  const { winner } = state.value
-  if (winner === null) return ''
-  if (isCpuMode) return winner === HUMAN ? '¡Ganaste!' : 'Ganó la CPU'
-  return `¡Ganó ${playerNames[winner]}!`
+const roundOverlay = computed(() => {
+  const result = roundResult.value
+  if (!result || activeMove.value) return null
+
+  const matchScore = isMultiRound
+    ? {
+        names: [playerNames[HUMAN], playerNames[CPU]] as [string, string],
+        wins: score.value.wins,
+        draws: score.value.draws,
+      }
+    : undefined
+  const primaryLabel = isMatchOver.value || !isMultiRound ? 'Jugar de nuevo' : 'Siguiente ronda'
+
+  if (result.kind === 'draw') {
+    return {
+      emoji: '🤝',
+      title: '¡Empate!',
+      detail: `La misma posición se repitió ${REPETITION_LIMIT} veces.`,
+      score: matchScore,
+      primaryLabel,
+    }
+  }
+
+  const isDefeat = isCpuMode && result.winner === CPU
+  const name = playerNames[result.winner]
+  return {
+    emoji: isDefeat ? '🤖' : '🏆',
+    title: winnerTitle(result.winner, isMatchOver.value || !isMultiRound),
+    detail:
+      isMatchOver.value && isMultiRound ? `${name} llegó a ${targetWins} victorias.` : undefined,
+    score: matchScore,
+    primaryLabel,
+  }
 })
+
+function winnerTitle(winner: PlayerIndex, isFinal: boolean): string {
+  const scope = isMultiRound ? (isFinal ? ' la partida' : ' la ronda') : ''
+  if (isCpuMode) return winner === HUMAN ? `¡Ganaste${scope}!` : `La CPU gana${scope}`
+  return `¡${playerNames[winner]} gana${scope}!`
+}
 
 function describeEvent(event: GameEvent): string {
   const name = playerNames[event.player]
@@ -141,9 +193,14 @@ function handleToggleMute() {
   playSfx('click')
 }
 
-function restartMatch() {
+function handleRestartMatch() {
   playSfx('start')
-  restart()
+  restartMatch()
+}
+
+function handleNextRound() {
+  playSfx('start')
+  nextRound()
 }
 
 function exitToMenu() {
@@ -173,7 +230,7 @@ function exitToMenu() {
         >
           <span aria-hidden="true">{{ settings.isMuted ? '🔇' : '🔊' }}</span>
         </BaseButton>
-        <BaseButton @click="restartMatch">Reiniciar</BaseButton>
+        <BaseButton @click="handleRestartMatch">Reiniciar</BaseButton>
       </div>
     </header>
 
@@ -196,6 +253,12 @@ function exitToMenu() {
         >
           {{ CPU_LEVEL_LABELS[cpuLevel] }}
         </span>
+        <ScoreDots
+          v-if="isMultiRound"
+          :wins="score.wins[player]"
+          :target="targetWins"
+          :label="`${score.wins[player]} de ${targetWins} victorias`"
+        />
       </p>
       <div
         class="flex justify-center gap-[clamp(1rem,10vw,4rem)]"
@@ -219,6 +282,15 @@ function exitToMenu() {
     </section>
 
     <section class="order-2 flex flex-col items-center gap-2 text-center">
+      <p class="min-h-6 text-sm font-semibold" aria-live="polite">
+        <span v-if="isRepetitionWarning" class="text-timer-urgent">
+          ⚠️ Posición repetida: una vez más y es empate
+        </span>
+        <span v-else-if="isMultiRound" class="text-muted">
+          Ronda {{ roundNumber }}
+          <template v-if="score.draws"> · Empates: {{ score.draws }}</template>
+        </span>
+      </p>
       <TurnTimer
         v-if="turnSeconds > 0"
         :remaining-ms="remainingMs"
@@ -243,13 +315,12 @@ function exitToMenu() {
       </BaseButton>
     </section>
 
-    <RulesSummary class="order-4" :turn-seconds="turnSeconds" />
+    <RulesSummary class="order-4" :turn-seconds="turnSeconds" :target-wins="targetWins" />
 
-    <WinnerOverlay
-      v-if="showWinner"
-      :title="winnerTitle"
-      :is-defeat="isHumanDefeated"
-      @restart="restartMatch"
+    <RoundOverlay
+      v-if="roundOverlay"
+      v-bind="roundOverlay"
+      @primary="handleNextRound"
       @exit="exitToMenu"
     />
   </main>

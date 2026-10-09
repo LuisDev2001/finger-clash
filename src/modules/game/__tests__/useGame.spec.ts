@@ -54,3 +54,38 @@ describe('useGame turn timer', () => {
     scope.stop()
   })
 })
+
+describe('useGame draw by repetition', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => vi.useRealTimers())
+
+  it('ends the round as a draw when a position repeats three times', () => {
+    const { game, scope } = setup({ turnSeconds: 10 })
+
+    vi.advanceTimersByTime(30_100)
+    expect(game.repetitionCount.value).toBe(2)
+    expect(game.roundResult.value).toBeNull()
+
+    vi.advanceTimersByTime(10_000)
+    expect(game.roundResult.value).toEqual({ kind: 'draw' })
+    expect(game.repetitionCount.value).toBe(3)
+    expect(game.remainingSeconds.value).toBeNull()
+    expect(game.isInputLocked.value).toBe(true)
+
+    vi.advanceTimersByTime(60_000)
+    expect(game.roundResult.value).toEqual({ kind: 'draw' })
+    scope.stop()
+  })
+
+  it('starts a fresh round with the requested first player', () => {
+    const { game, scope } = setup({ turnSeconds: 10 })
+    vi.advanceTimersByTime(40_100)
+
+    game.restart(1)
+
+    expect(game.roundResult.value).toBeNull()
+    expect(game.repetitionCount.value).toBe(1)
+    expect(game.state.value.turn).toBe(1)
+    scope.stop()
+  })
+})
