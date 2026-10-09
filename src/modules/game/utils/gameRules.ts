@@ -1,4 +1,10 @@
-import type { GameState, HandSide, Hands, Move, PlayerIndex } from './game.models'
+import type {
+  GameState,
+  HandSide,
+  Hands,
+  Move,
+  PlayerIndex,
+} from '@/modules/game/models/game.models'
 
 export const FINGERS_PER_HAND = 5
 export const HAND_SIDES: readonly HandSide[] = ['left', 'right']

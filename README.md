@@ -11,7 +11,7 @@ A small finger-counting game (a take on "Chopsticks") built with Vue 3, TypeScri
 - Each turn has a time limit (20 s by default); when it runs out, that player loses the turn.
 - Whoever runs out of fingers on both hands loses.
 
-Play against the CPU (easy, normal or hard) or with two players on the same screen. Settings
+Play against the CPU (easy, medium or hard) or with two players on the same screen. Settings
 (mode, CPU level, turn time, music and effects volume) are stored in the browser.
 
 Music and sound effects are synthesized at runtime with the Web Audio API, so there are no audio assets.
@@ -29,8 +29,20 @@ pnpm build
 
 ## Structure
 
-- `src/modules/game`: rules (`gameRules.ts`), solver for the hard CPU (`gameSolver.ts`), CPU levels
-  (`cpuPlayer.ts`), turn flow and timer (`useGame.ts`) and the board components.
-- `src/modules/home`: start screen, logo, settings and terms dialogs.
-- `src/modules/settings`: persisted settings.
-- `src/modules/audio`: Web Audio music loop and sound effects.
+Screaming architecture: each business domain owns its views, components, composables, models and
+utils. Imports always use the `@/` alias.
+
+```
+src/
+  router/                  routes: / (home), /settings, /game
+  assets/main.css          Tailwind CSS v4 entry and theme tokens
+  shared/components/       BaseButton, HandArt (used by several modules)
+  modules/
+    home/                  HomeView, GameLogo, TermsDialog
+    settings/              SettingsView, OptionGroup, useSettings, parseSettings
+    game/                  GameView, PlayerHand, TurnTimer, useGame, useMoveAnimation,
+                           useGameSounds, gameRules, gameSolver, cpuPlayer
+    audio/                 audioEngine (Web Audio), useAppAudio
+```
+
+Stack: Vue 3, Vue Router, Tailwind CSS v4, TypeScript, Vite, Vitest.

@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { effectScope } from 'vue'
-import { MOVE_DURATION_MS, useGame, type GameOptions } from '../useGame'
+import { MOVE_DURATION_MS, useGame, type GameOptions } from '@/modules/game/composables/useGame'
 
 function setup(options: Partial<GameOptions> = {}) {
   const scope = effectScope()
   const game = scope.run(() =>
-    useGame({ mode: 'local', cpuLevel: 'normal', turnSeconds: 20, ...options }),
+    useGame({ mode: 'local', cpuLevel: 'medium', turnSeconds: 20, ...options }),
   )!
   return { game, scope }
 }

@@ -1,62 +1,19 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
-import { setAudioLevels, startMusic, stopMusic, unlockAudio } from './modules/audio/audioEngine'
-import GameBoard from './modules/game/components/GameBoard.vue'
-import HomeScreen from './modules/home/components/HomeScreen.vue'
-import { useSettings } from './modules/settings/useSettings'
+import { useAppAudio } from '@/modules/audio/composables/useAppAudio'
 
-type Screen = 'home' | 'game'
-
-const screen = ref<Screen>('home')
-const { settings } = useSettings()
-const UNLOCK_EVENTS = ['pointerdown', 'keydown'] as const
-
-watchEffect(() =>
-  setAudioLevels({
-    music: settings.value.musicVolume,
-    sfx: settings.value.sfxVolume,
-    isMuted: settings.value.isMuted,
-  }),
-)
-
-function handleFirstInteraction() {
-  unlockAudio()
-  UNLOCK_EVENTS.forEach((type) => window.removeEventListener(type, handleFirstInteraction))
-}
-
-onMounted(() => {
-  startMusic()
-  UNLOCK_EVENTS.forEach((type) => window.addEventListener(type, handleFirstInteraction))
-})
-
-onBeforeUnmount(() => {
-  stopMusic()
-  UNLOCK_EVENTS.forEach((type) => window.removeEventListener(type, handleFirstInteraction))
-})
+useAppAudio()
 </script>
 
 <template>
-  <Transition name="screen" mode="out-in">
-    <HomeScreen v-if="screen === 'home'" @start="screen = 'game'" />
-    <GameBoard v-else @exit="screen = 'home'" />
-  </Transition>
+  <RouterView v-slot="{ Component }">
+    <Transition
+      mode="out-in"
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="translate-y-4 opacity-0"
+      leave-active-class="transition duration-200 ease-in"
+      leave-to-class="-translate-y-4 opacity-0"
+    >
+      <component :is="Component" />
+    </Transition>
+  </RouterView>
 </template>
-
-<style scoped>
-.screen-enter-active,
-.screen-leave-active {
-  transition:
-    opacity 220ms ease,
-    transform 220ms ease;
-}
-
-.screen-enter-from {
-  opacity: 0;
-  transform: translateY(16px);
-}
-
-.screen-leave-to {
-  opacity: 0;
-  transform: translateY(-16px);
-}
-</style>

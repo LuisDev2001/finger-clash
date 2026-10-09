@@ -1,16 +1,11 @@
-import { ref, watch } from 'vue'
 import {
+  CPU_LEVELS,
   DEFAULT_SETTINGS,
+  GAME_MODES,
   TURN_SECONDS_OPTIONS,
-  type CpuLevel,
-  type GameMode,
   type Settings,
   type TurnSeconds,
-} from './settings.models'
-
-const STORAGE_KEY = 'finger-clash:settings'
-const GAME_MODES: readonly GameMode[] = ['cpu', 'local']
-const CPU_LEVELS: readonly CpuLevel[] = ['easy', 'normal', 'hard']
+} from '@/modules/settings/models/settings.models'
 
 export function parseSettings(raw: unknown): Settings {
   if (typeof raw !== 'object' || raw === null) return { ...DEFAULT_SETTINGS }
@@ -37,35 +32,4 @@ function pickOption<T>(value: unknown, options: readonly T[], fallback: T): T {
 function pickVolume(value: unknown, fallback: number): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) return fallback
   return Math.min(100, Math.max(0, Math.round(value)))
-}
-
-function readStoredSettings(): Settings {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    return parseSettings(stored ? JSON.parse(stored) : null)
-  } catch {
-    return { ...DEFAULT_SETTINGS }
-  }
-}
-
-const settings = ref<Settings>(readStoredSettings())
-
-watch(
-  settings,
-  (value) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
-    } catch {
-      // Storage can be unavailable (private mode); settings still work for this session.
-    }
-  },
-  { deep: true },
-)
-
-export function useSettings() {
-  function resetSettings() {
-    settings.value = { ...DEFAULT_SETTINGS }
-  }
-
-  return { settings, resetSettings }
 }

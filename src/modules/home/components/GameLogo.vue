@@ -1,158 +1,43 @@
 <script setup lang="ts">
-import HandArt from '@/components/HandArt.vue'
+import HandArt from '@/shared/components/HandArt.vue'
+
+const HAND_CLASS = 'absolute top-1/2 w-[36%] drop-shadow-[0_6px_0_rgb(0_0_0/0.12)]'
+const WORD_CLASS =
+  '[-webkit-text-stroke:0.08em_var(--color-logo-ink)] [paint-order:stroke_fill] [text-shadow:0_0.09em_0_var(--color-logo-ink)]'
 </script>
 
 <template>
-  <div class="game-logo" role="img" aria-label="Finger Clash">
-    <div class="logo-art" aria-hidden="true">
-      <svg class="logo-burst" viewBox="-50 -50 100 100">
+  <div class="flex flex-col items-center" role="img" aria-label="Finger Clash">
+    <div class="relative aspect-[2/1] w-[min(84vw,380px)]" aria-hidden="true">
+      <svg
+        class="absolute top-[35%] left-1/2 w-[34%] -translate-1/2 animate-burst overflow-visible motion-reduce:animate-none"
+        viewBox="-50 -50 100 100"
+      >
         <polygon
+          class="fill-burst stroke-burst-line stroke-3 [stroke-linejoin:round]"
           points="0,-48 9,-20 34,-34 22,-8 48,0 22,8 34,34 9,20 0,48 -9,20 -34,34 -22,8 -48,0 -22,-8 -34,-34 -9,-20"
         />
-        <circle r="10" />
+        <circle class="fill-white/85" r="10" />
       </svg>
-      <div class="logo-hand logo-hand-left">
-        <HandArt :count="1" side="right" cuff-color="var(--player-color)" />
+      <div
+        :class="HAND_CLASS"
+        class="left-[12%] [transform:translateY(-50%)_rotate(90deg)] animate-clash-left motion-reduce:animate-none"
+      >
+        <HandArt :count="1" side="right" cuff-color="var(--color-player)" />
       </div>
-      <div class="logo-hand logo-hand-right">
-        <HandArt :count="1" side="left" cuff-color="var(--rival-color)" />
+      <div
+        :class="HAND_CLASS"
+        class="right-[12%] [transform:translateY(-50%)_rotate(-90deg)] animate-clash-right motion-reduce:animate-none"
+      >
+        <HandArt :count="1" side="left" cuff-color="var(--color-rival)" />
       </div>
     </div>
-    <p class="logo-word" aria-hidden="true">
-      <span class="word-finger">Finger</span>
-      <span class="word-clash">Clash!</span>
+    <p
+      class="-mt-[clamp(1.5rem,6vw,3rem)] flex -rotate-4 flex-wrap justify-center gap-x-[0.35em] font-display text-[clamp(2.8rem,13vw,5rem)] leading-none tracking-wide"
+      aria-hidden="true"
+    >
+      <span class="text-player" :class="WORD_CLASS">Finger</span>
+      <span class="text-burst" :class="WORD_CLASS">Clash!</span>
     </p>
   </div>
 </template>
-
-<style scoped>
-.game-logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.logo-art {
-  position: relative;
-  width: min(84vw, 380px);
-  aspect-ratio: 2 / 1;
-}
-
-.logo-burst {
-  position: absolute;
-  top: 35%;
-  left: 50%;
-  width: 34%;
-  translate: -50% -50%;
-  overflow: visible;
-  animation: burst 1.6s ease-in-out infinite;
-}
-
-.logo-burst polygon {
-  fill: var(--logo-burst);
-  stroke: var(--logo-burst-line);
-  stroke-width: 3;
-  stroke-linejoin: round;
-}
-
-.logo-burst circle {
-  fill: #fff;
-  opacity: 0.85;
-}
-
-.logo-hand {
-  position: absolute;
-  top: 50%;
-  width: 36%;
-}
-
-.logo-hand-left {
-  left: 12%;
-  animation: clash-left 1.6s ease-in-out infinite;
-}
-
-.logo-hand-right {
-  right: 12%;
-  animation: clash-right 1.6s ease-in-out infinite;
-}
-
-.logo-word {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0 0.35em;
-  margin: clamp(-3rem, -6vw, -1.5rem) 0 0;
-  font-family: 'Lilita One', 'Fredoka', ui-rounded, system-ui, sans-serif;
-  font-size: clamp(2.8rem, 13vw, 5rem);
-  line-height: 1;
-  letter-spacing: 0.02em;
-  transform: rotate(-4deg);
-}
-
-.logo-word span {
-  -webkit-text-stroke: 0.08em var(--logo-ink);
-  paint-order: stroke fill;
-  text-shadow: 0 0.09em 0 var(--logo-ink);
-}
-
-.word-finger {
-  color: var(--player-color);
-}
-
-.word-clash {
-  color: var(--logo-burst);
-}
-
-@keyframes clash-left {
-  0%,
-  100% {
-    transform: translateY(-50%) rotate(90deg) translateY(0);
-  }
-  45% {
-    transform: translateY(-50%) rotate(90deg) translateY(-7%);
-  }
-  55% {
-    transform: translateY(-50%) rotate(84deg) translateY(1%);
-  }
-}
-
-@keyframes clash-right {
-  0%,
-  100% {
-    transform: translateY(-50%) rotate(-90deg) translateY(0);
-  }
-  45% {
-    transform: translateY(-50%) rotate(-90deg) translateY(-7%);
-  }
-  55% {
-    transform: translateY(-50%) rotate(-84deg) translateY(1%);
-  }
-}
-
-@keyframes burst {
-  0%,
-  40%,
-  100% {
-    scale: 0.85;
-    rotate: 0deg;
-  }
-  52% {
-    scale: 1.15;
-    rotate: 12deg;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .logo-burst,
-  .logo-hand-left,
-  .logo-hand-right {
-    animation: none;
-  }
-  .logo-hand-left {
-    transform: translateY(-50%) rotate(90deg);
-  }
-  .logo-hand-right {
-    transform: translateY(-50%) rotate(-90deg);
-  }
-}
-</style>
