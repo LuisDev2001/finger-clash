@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { GameState } from '../game.models'
-import { chooseCpuMove } from '../cpuPlayer'
-import { applyMove, getLegalMoves } from '../gameRules'
-import { evaluatePosition } from '../gameSolver'
+import type { GameState } from '@/modules/game/models/game.models'
+import { chooseCpuMove } from '@/modules/game/utils/cpuPlayer'
+import { applyMove, getLegalMoves } from '@/modules/game/utils/gameRules'
+import { evaluatePosition } from '@/modules/game/utils/gameSolver'
 
 function cpuTurn(human: [number, number], cpu: [number, number]): GameState {
   return {
@@ -16,7 +16,7 @@ function cpuTurn(human: [number, number], cpu: [number, number]): GameState {
 }
 
 describe('chooseCpuMove', () => {
-  it.each(['normal', 'hard'] as const)('takes an immediate win on %s', (level) => {
+  it.each(['medium', 'hard'] as const)('takes an immediate win on %s', (level) => {
     const state = cpuTurn([0, 2], [1, 3])
 
     const move = chooseCpuMove(state, level, () => 0)
@@ -24,11 +24,11 @@ describe('chooseCpuMove', () => {
     expect(applyMove(state, move).winner).toBe(1)
   })
 
-  it('avoids moves that let the human win next turn on normal', () => {
+  it('avoids moves that let the human win next turn on medium', () => {
     const state = cpuTurn([1, 3], [0, 1])
 
     for (const roll of [0, 0.5, 0.99]) {
-      expect(chooseCpuMove(state, 'normal', () => roll)).toEqual({
+      expect(chooseCpuMove(state, 'medium', () => roll)).toEqual({
         type: 'attack',
         from: 'right',
         to: 'left',
@@ -52,7 +52,7 @@ describe('chooseCpuMove', () => {
     }
   })
 
-  it.each(['easy', 'normal', 'hard'] as const)(
+  it.each(['easy', 'medium', 'hard'] as const)(
     'always returns a legal move on %s even when every option loses',
     (level) => {
       const state = cpuTurn([4, 4], [0, 1])

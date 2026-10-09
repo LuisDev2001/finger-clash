@@ -24,103 +24,32 @@ onMounted(() => syncOpenState(props.isOpen))
 <template>
   <dialog
     ref="dialogRef"
-    class="app-dialog"
+    class="m-auto max-h-[min(100dvh-2rem,720px)] w-[min(100%-2rem,520px)] rounded-[1.75rem] bg-surface p-0 text-left text-ink shadow-[0_14px_0_rgb(0_0_0/0.18)] backdrop:bg-overlay open:animate-bounce-in"
     :aria-label="title"
     @close="emit('close')"
     @click="closeOnBackdrop"
   >
-    <div class="dialog-panel">
-      <header class="dialog-header">
-        <h2>{{ title }}</h2>
-        <button type="button" class="close-button" aria-label="Cerrar" @click="dialogRef?.close()">
+    <div class="flex max-h-[inherit] flex-col">
+      <header class="flex items-center justify-between gap-4 px-6 pt-5 pb-3">
+        <h2 class="text-2xl font-bold">{{ title }}</h2>
+        <button
+          type="button"
+          class="size-10 rounded-full bg-outline font-bold"
+          aria-label="Cerrar"
+          @click="dialogRef?.close()"
+        >
           ✕
         </button>
       </header>
-      <div class="dialog-body">
+      <div class="overflow-y-auto px-6 pt-1 pb-4">
         <slot />
       </div>
-      <footer v-if="$slots.footer" class="dialog-footer">
+      <footer
+        v-if="$slots.footer"
+        class="flex flex-wrap justify-end gap-3 border-t-2 border-outline px-6 pt-4 pb-5"
+      >
         <slot name="footer" />
       </footer>
     </div>
   </dialog>
 </template>
-
-<style scoped>
-.app-dialog {
-  width: min(100% - 2rem, 520px);
-  max-height: min(100dvh - 2rem, 720px);
-  padding: 0;
-  border: none;
-  border-radius: 1.75rem;
-  background: var(--surface);
-  color: var(--text);
-  text-align: left;
-  box-shadow: 0 14px 0 rgb(0 0 0 / 18%);
-}
-
-.app-dialog[open] {
-  animation: dialog-in 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.app-dialog::backdrop {
-  background: rgb(20 16 40 / 60%);
-}
-
-.dialog-panel {
-  display: flex;
-  flex-direction: column;
-  max-height: inherit;
-}
-
-.dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem 0.75rem;
-}
-
-.dialog-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.close-button {
-  width: 2.4rem;
-  height: 2.4rem;
-  border: none;
-  border-radius: 999px;
-  background: var(--outline);
-  color: var(--text);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.dialog-body {
-  padding: 0.25rem 1.5rem 1rem;
-  overflow-y: auto;
-}
-
-.dialog-footer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem 1.25rem;
-  border-top: 2px solid var(--outline);
-}
-
-button:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-@keyframes dialog-in {
-  from {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-}
-</style>

@@ -1,8 +1,14 @@
 import { computed, onScopeDispose, ref } from 'vue'
-import type { CpuLevel, GameMode } from '../settings/settings.models'
-import type { GameState, HandSide, Move, PlayerIndex } from './game.models'
-import { applyMove, createInitialState, getLegalMoves, getOpponent, passTurn } from './gameRules'
-import { chooseCpuMove } from './cpuPlayer'
+import type { CpuLevel, GameMode } from '@/modules/settings/models/settings.models'
+import type { GameState, HandSide, Move, PlayerIndex } from '@/modules/game/models/game.models'
+import {
+  applyMove,
+  createInitialState,
+  getLegalMoves,
+  getOpponent,
+  passTurn,
+} from '@/modules/game/utils/gameRules'
+import { chooseCpuMove } from '@/modules/game/utils/cpuPlayer'
 
 export interface GameOptions {
   mode: GameMode
@@ -24,6 +30,7 @@ export const HUMAN: PlayerIndex = 0
 export const CPU: PlayerIndex = 1
 export const MOVE_CONTACT_MS = 320
 export const MOVE_DURATION_MS = 640
+export const URGENT_SECONDS = 5
 const CPU_THINK_MS = 650
 const TIMER_TICK_MS = 100
 

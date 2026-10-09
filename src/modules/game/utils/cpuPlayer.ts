@@ -1,13 +1,13 @@
-import type { CpuLevel } from '../settings/settings.models'
-import type { GameState, Move } from './game.models'
-import { applyMove, getLegalMoves, getOpponent } from './gameRules'
-import { evaluatePosition } from './gameSolver'
+import type { CpuLevel } from '@/modules/settings/models/settings.models'
+import type { GameState, Move } from '@/modules/game/models/game.models'
+import { applyMove, getLegalMoves, getOpponent } from '@/modules/game/utils/gameRules'
+import { evaluatePosition } from '@/modules/game/utils/gameSolver'
 
 type Random = () => number
 
 export function chooseCpuMove(
   state: GameState,
-  level: CpuLevel = 'normal',
+  level: CpuLevel = 'medium',
   random: Random = Math.random,
 ): Move {
   const moves = getLegalMoves(state)

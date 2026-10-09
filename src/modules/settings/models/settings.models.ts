@@ -1,6 +1,10 @@
-export type GameMode = 'cpu' | 'local'
+export const GAME_MODES = ['cpu', 'local'] as const
 
-export type CpuLevel = 'easy' | 'normal' | 'hard'
+export type GameMode = (typeof GAME_MODES)[number]
+
+export const CPU_LEVELS = ['easy', 'medium', 'hard'] as const
+
+export type CpuLevel = (typeof CPU_LEVELS)[number]
 
 export const TURN_SECONDS_OPTIONS = [0, 10, 20, 30] as const
 
@@ -17,7 +21,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Readonly<Settings> = {
   mode: 'cpu',
-  cpuLevel: 'normal',
+  cpuLevel: 'medium',
   turnSeconds: 20,
   musicVolume: 40,
   sfxVolume: 70,
@@ -31,8 +35,14 @@ export const MODE_LABELS: Record<GameMode, string> = {
 
 export const CPU_LEVEL_LABELS: Record<CpuLevel, string> = {
   easy: 'Fácil',
-  normal: 'Normal',
+  medium: 'Medio',
   hard: 'Difícil',
+}
+
+export const CPU_LEVEL_HINTS: Record<CpuLevel, string> = {
+  easy: 'Juega al azar: ideal para aprender.',
+  medium: 'Aprovecha tus errores y evita los suyos.',
+  hard: 'Calcula la partida completa: no se equivoca nunca.',
 }
 
 export function formatTurnSeconds(seconds: TurnSeconds): string {

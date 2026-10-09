@@ -1,5 +1,10 @@
-import type { GameState, Hands } from './game.models'
-import { applyMove, FINGERS_PER_HAND, getLegalMoves, isOutOfFingers } from './gameRules'
+import type { GameState, Hands } from '@/modules/game/models/game.models'
+import {
+  applyMove,
+  FINGERS_PER_HAND,
+  getLegalMoves,
+  isOutOfFingers,
+} from '@/modules/game/utils/gameRules'
 
 export type Outcome = 'win' | 'loss' | 'draw'
 

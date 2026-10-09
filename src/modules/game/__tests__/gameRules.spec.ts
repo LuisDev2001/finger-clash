@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import type { GameState } from '../game.models'
-import { applyMove, createInitialState, getLegalMoves, passTurn } from '../gameRules'
+import type { GameState } from '@/modules/game/models/game.models'
+import {
+  applyMove,
+  createInitialState,
+  getLegalMoves,
+  passTurn,
+} from '@/modules/game/utils/gameRules'
 
 function stateWith(
   own: [number, number],
