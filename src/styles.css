@@ -1,0 +1,64 @@
+:root {
+  color-scheme: light;
+  --bg: #fff6e9;
+  --bg-dots: #ffe7c7;
+  --surface: #ffffff;
+  --outline: #f1dcc0;
+  --text: #2d2346;
+  --text-muted: #6c5f86;
+  --accent: #7c5cff;
+  --accent-text: #ffffff;
+  --accent-shadow: #5236c9;
+  --focus-ring: #ffb020;
+  --turn-ring: #ffb020;
+  --player-color: #3b82f6;
+  --rival-color: #ef4f6b;
+  --player-zone: #e3efff;
+  --rival-zone: #ffe4e8;
+  --skin: #ffd4ad;
+  --skin-shade: #f4bd8f;
+  --skin-line: #b07650;
+  --nail: #ffe9d8;
+  --badge-bg: #2d2346;
+  --badge-text: #ffffff;
+  --dead-badge: #b8b0c8;
+  --selected-glow: #ffb020;
+  --target-glow: #ef4f6b;
+  --timer-ok: #22c58b;
+  --timer-urgent: #ef4f6b;
+  --logo-burst: #ffd23f;
+  --logo-burst-line: #ff8a1f;
+  --logo-ink: #2d2346;
+
+  font-family: 'Fredoka', ui-rounded, 'Segoe UI', system-ui, sans-serif;
+  color: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #1b1730;
+    --bg-dots: #241f3d;
+    --surface: #2a2447;
+    --outline: #3b3462;
+    --text: #f4f0ff;
+    --text-muted: #b9b0d8;
+    --player-zone: #1f2c4d;
+    --rival-zone: #3d2236;
+    --badge-bg: #f4f0ff;
+    --badge-text: #1b1730;
+    --dead-badge: #5c5480;
+    --logo-ink: #0f0c1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--bg-dots) 2px, transparent 2px);
+  background-size: 22px 22px;
+}
