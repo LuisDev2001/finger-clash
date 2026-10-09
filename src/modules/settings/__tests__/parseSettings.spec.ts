@@ -8,11 +8,19 @@ describe('parseSettings', () => {
     expect(parseSettings('oops')).toEqual(DEFAULT_SETTINGS)
   })
 
+  it('maps the legacy normal CPU level and missing match length to defaults', () => {
+    const parsed = parseSettings({ cpuLevel: 'normal' })
+
+    expect(parsed.cpuLevel).toBe('medium')
+    expect(parsed.targetWins).toBe(3)
+  })
+
   it('keeps valid values and replaces invalid fields one by one', () => {
     const parsed = parseSettings({
       mode: 'local',
       cpuLevel: 'impossible',
       turnSeconds: 15,
+      targetWins: 5,
       musicVolume: 140,
       sfxVolume: 35.6,
       isMuted: 'yes',
@@ -22,6 +30,7 @@ describe('parseSettings', () => {
       mode: 'local',
       cpuLevel: DEFAULT_SETTINGS.cpuLevel,
       turnSeconds: DEFAULT_SETTINGS.turnSeconds,
+      targetWins: 5,
       musicVolume: 100,
       sfxVolume: 36,
       isMuted: DEFAULT_SETTINGS.isMuted,

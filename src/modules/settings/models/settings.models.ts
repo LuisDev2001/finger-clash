@@ -10,10 +10,15 @@ export const TURN_SECONDS_OPTIONS = [0, 10, 20, 30] as const
 
 export type TurnSeconds = (typeof TURN_SECONDS_OPTIONS)[number]
 
+export const TARGET_WINS_OPTIONS = [1, 3, 5] as const
+
+export type TargetWins = (typeof TARGET_WINS_OPTIONS)[number]
+
 export interface Settings {
   mode: GameMode
   cpuLevel: CpuLevel
   turnSeconds: TurnSeconds
+  targetWins: TargetWins
   musicVolume: number
   sfxVolume: number
   isMuted: boolean
@@ -23,6 +28,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = {
   mode: 'cpu',
   cpuLevel: 'medium',
   turnSeconds: 20,
+  targetWins: 3,
   musicVolume: 40,
   sfxVolume: 70,
   isMuted: false,
@@ -47,4 +53,8 @@ export const CPU_LEVEL_HINTS: Record<CpuLevel, string> = {
 
 export function formatTurnSeconds(seconds: TurnSeconds): string {
   return seconds === 0 ? 'Sin límite' : `${seconds} s`
+}
+
+export function formatTargetWins(wins: TargetWins): string {
+  return wins === 1 ? 'Partida única' : `A ${wins} victorias`
 }

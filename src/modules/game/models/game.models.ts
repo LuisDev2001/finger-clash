@@ -14,3 +14,5 @@ export interface GameState {
   turn: PlayerIndex
   winner: PlayerIndex | null
 }
+
+export type RoundResult = { kind: 'win'; winner: PlayerIndex } | { kind: 'draw' }

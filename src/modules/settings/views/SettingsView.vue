@@ -8,9 +8,11 @@ import {
   CPU_LEVEL_HINTS,
   CPU_LEVEL_LABELS,
   CPU_LEVELS,
+  formatTargetWins,
   formatTurnSeconds,
   GAME_MODES,
   MODE_LABELS,
+  TARGET_WINS_OPTIONS,
   TURN_SECONDS_OPTIONS,
 } from '@/modules/settings/models/settings.models'
 import { ROUTE_NAMES } from '@/router'
@@ -24,6 +26,11 @@ const levelOptions = CPU_LEVELS.map((value) => ({ value, label: CPU_LEVEL_LABELS
 const timeOptions = TURN_SECONDS_OPTIONS.map((value) => ({
   value,
   label: formatTurnSeconds(value),
+}))
+
+const matchOptions = TARGET_WINS_OPTIONS.map((value) => ({
+  value,
+  label: formatTargetWins(value),
 }))
 
 const isCpuMode = computed(() => settings.value.mode === 'cpu')
@@ -73,6 +80,13 @@ function handleReset() {
         :options="levelOptions"
         :hint="levelHint"
         :is-disabled="!isCpuMode"
+      />
+      <OptionGroup
+        v-model="settings.targetWins"
+        legend="Duración de la partida"
+        name="target-wins"
+        :options="matchOptions"
+        hint="Gana quien llegue primero a esas victorias. Repetir 3 veces la misma posición es empate."
       />
       <OptionGroup
         v-model="settings.turnSeconds"
